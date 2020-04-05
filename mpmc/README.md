@@ -1,5 +1,5 @@
 ### mpmc: multiple producer, multiple consumer
-
+```
  sender1 -----\                           /------> receiver1
                \      +------------+     /
  sender2 -----------> | mpmc_queue |---->--------> receiver2
@@ -7,6 +7,7 @@
  ...           /                          \         ...
               /                            \
  senderM ----/                              \----> receiverN
+```
 
 ### use mutex and condition
 * golang: sync.Mutex + sync.Cond
