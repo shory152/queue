@@ -2,7 +2,7 @@
 //! rust spsc queue
 //!
 
-use std::sync::{Condvar, Mutex};
+use std::sync::{Condvar, Mutex, Arc};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{mem, ptr, thread};
 use std::alloc;
@@ -151,53 +151,94 @@ impl<T> Drop for SpscQueue<T> {
         }
     }
 }
+unsafe impl<T> Send for SpscQueue<T>{}
+unsafe impl<T> Sync for SpscQueue<T>{}
 
-fn main() {
+/// send/recv N times
+const N : i64 = 100000000_i64;
+
+fn recv<T>(q : &SpscQueue<T>) {
+    let begin = std::time::Instant::now();
+    for i in 0..N {
+        let e = q.pop();
+    }
+    let elapse = begin.elapsed();
+    println!("  recv end. {:.0} recv/ms, {:.0} ns/recv",
+             N as f64 / elapse.as_millis() as f64,
+             elapse.as_nanos() as f64 / N as f64);
+}
+fn send(q : &SpscQueue<i64>){
+    for i in 0..N {
+        q.push(i);
+    }
+}
+
+/// test share spsc by Arc
+fn test_spsc_with_arc() {
+    let q1 = Arc::new(SpscQueue::<i64>::new(2 << 16, WaitType::BusyWait));
+    let q2 = Arc::new(SpscQueue::<i64>::new(2 << 16, WaitType::SleepWait));
+
+    // test q1
+    println!("Arc: test spsc with busy loop...");
+    let q1Clone = q1.clone();
+    let thd1 = thread::spawn(move || { recv(&q1); });
+    let thd2 = thread::spawn(move || { send(&q1Clone); });
+    thd1.join();
+    thd2.join();
+
+    // test q2
+    println!("Arc: test spsc with mutex+condition...");
+    let q2Clone = q2.clone();
+    let thd1 = thread::spawn(move || { recv(&q2); });
+    let thd2 = thread::spawn(move || { send(&q2Clone); });
+    thd1.join();
+    thd2.join();
+}
+
+/// test share spsc by pointer
+fn test_spsc_with_ptr() {
     let q1 = Box::new(SpscQueue::<i64>::new(2 << 16, WaitType::BusyWait));
     let q2 = Box::new(SpscQueue::<i64>::new(2 << 16, WaitType::SleepWait));
     // Box to raw pointer to be shared by threads
     let q1addr = Box::into_raw(q1) as usize;
     let q2addr = Box::into_raw(q2) as usize;
-    let N = 100000000_i64;
-
-    let recv = move |q: usize| {
-        let q = unsafe { (q as *mut SpscQueue<i64>).as_mut().unwrap() };
-        let begin = std::time::Instant::now();
-        for i in 0..N {
-            let e = q.pop();
-            //println!("read {}", e);
-        }
-        let elapse = begin.elapsed();
-        println!("  recv end. {:.0} recv/ms, {:.0} ns/recv",
-                 N as f64 / elapse.as_millis() as f64,
-                 elapse.as_nanos() as f64 / N as f64);
-    };
-
-    let send = move |q: usize| {
-        let q = unsafe { (q as *mut SpscQueue<i64>).as_mut().unwrap() };
-        for i in 0..N {
-            q.push(i);
-            //println!("write {}", i);
-        }
-    };
 
     // test q1
     println!("test spsc with busy loop...");
-    let thd1 = thread::spawn(move || { recv(q1addr); });
-    let thd2 = thread::spawn(move || { send(q1addr); });
+    let thd1 = thread::spawn(move || {
+        let q = unsafe { (q1addr as *mut SpscQueue<i64>).as_mut().unwrap() };
+        recv(q);
+    });
+    let thd2 = thread::spawn(move || {
+        let q = unsafe { (q1addr as *mut SpscQueue<i64>).as_mut().unwrap() };
+        send(q);
+    });
     thd1.join();
     thd2.join();
 
     // test q2
     println!("test spsc with mutex+condition...");
-    let thd1 = thread::spawn(move || { recv(q2addr); });
-    let thd2 = thread::spawn(move || { send(q2addr); });
+    let thd1 = thread::spawn(move || {
+        let q = unsafe { (q2addr as *mut SpscQueue<i64>).as_mut().unwrap() };
+        recv(q);
+    });
+    let thd2 = thread::spawn(move || {
+        let q = unsafe { (q2addr as *mut SpscQueue<i64>).as_mut().unwrap() };
+        send(q);
+    });
     thd1.join();
     thd2.join();
 
     // restore Box for cleanup
-    let q1 = unsafe { Box::from_raw(q1addr as *mut SpscQueue<i64>) };
-    let q2 = unsafe { Box::from_raw(q2addr as *mut SpscQueue<i64>) };
+    {
+        let _q1 = unsafe { Box::from_raw(q1addr as *mut SpscQueue<i64>) };
+        let _q2 = unsafe { Box::from_raw(q2addr as *mut SpscQueue<i64>) };
+    }
+}
+
+fn main() {
+    test_spsc_with_ptr();
+    test_spsc_with_arc();
 }
 
 
