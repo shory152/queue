@@ -1,4 +1,4 @@
-### spsc: single producer, single comsumer
+### spsc: single producer, single consumer
 
 thread1(goroutine1) ---send----> spsc_queue ---recv---> thread2(goroutine2)
 
