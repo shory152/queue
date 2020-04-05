@@ -15,8 +15,11 @@ thread1(goroutine1) ---send----> spsc_queue ---recv---> thread2(goroutine2)
 * golang: sync.Mutex + sync.Cond
 * rust: sync::Mutex + sync::CondVar
 
-### test
+### test result
 * env: AMD Phenom(tm) II X3 710, 3core*1thread, 2.6GHz, 6G RAM.
+* Linux 4.18.19-100.fc27.x86_64
+* go version go1.9.2 linux/amd64
+* rustc 1.37.0 (eae3437df 2019-08-13)
 
 test case              | busy loop                 | wait condition
 -----------------------|---------------------------|----------------
