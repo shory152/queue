@@ -7,3 +7,4 @@ We will test queue performance with rust and golang.
   - wait semaphore
 * mpsc
 * mpmc
+* lfmpmc: lock-free mpmc

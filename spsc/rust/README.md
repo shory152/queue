@@ -1,4 +1,4 @@
 ## build test program
 
-rsutc spsc.go
+rsutc -O spsc.go
 

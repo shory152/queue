@@ -29,10 +29,11 @@
 * rust1-mpmc
 * rust2-mpmc
 
+unit: recv/ms
 
 sender | receiver | java-mpmc | go-mpmc | go-chan | rust1-mpmc | rust2-mpmc
 -------|----------|-----------|---------|---------|------------|----------------
-1      | 1        |
+1      | 1        | 3445  
 1      | 2        |
 1      | 4        |
 1      | 8        |
@@ -43,8 +44,8 @@ sender | receiver | java-mpmc | go-mpmc | go-chan | rust1-mpmc | rust2-mpmc
 8      | 1        |
 32     | 1        |
 128    | 1        |
-2      | 2        |
-4      | 4        |
+2      | 2        | 6456
+4      | 4        | 3223
 8      | 8        |
 32     | 32       |
 128    | 128      |

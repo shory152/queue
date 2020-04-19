@@ -20,13 +20,15 @@ import (
 	"time"
 )
 
+const PAD_BYTES = 7
+
 type Mpmc struct {
 	count    int64
-	_pad1    [7]int64
+	_pad1    [PAD_BYTES]int64
 	i_idx    int64
-	_pad2    [7]int64
+	_pad2    [PAD_BYTES]int64
 	o_idx    int64
-	_pad3    [7]int64
+	_pad3    [PAD_BYTES]int64
 	cap      int64 // must be power of two
 	mod      int64 // cap-1
 	buf      []int64

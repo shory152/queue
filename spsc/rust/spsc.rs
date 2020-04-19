@@ -13,13 +13,15 @@ pub enum WaitType {
     SleepWait,
 }
 
+const PAD_BYTES : usize = 7;
+
 struct SpscQueue<T> {
     count: AtomicUsize,
-    _pad1: [i64; 7],
+    _pad1: [i64; PAD_BYTES],
     i_idx: usize,
-    _pad2: [i64; 7],
+    _pad2: [i64; PAD_BYTES],
     o_idx: usize,
-    _pad3: [i64; 7],
+    _pad3: [i64; PAD_BYTES],
     capacity: usize,
     mode: usize,
     wait_mode: WaitType,
@@ -47,11 +49,11 @@ impl<T> SpscQueue<T> {
 
             SpscQueue {
                 count: AtomicUsize::new(0),
-                _pad1: [0; 7],
+                _pad1: [0; PAD_BYTES],
                 i_idx: 0,
-                _pad2: [0; 7],
+                _pad2: [0; PAD_BYTES],
                 o_idx: 0,
-                _pad3: [0; 7],
+                _pad3: [0; PAD_BYTES],
                 capacity: cap,
                 mode: cap - 1,
                 buf: buf as *const T,

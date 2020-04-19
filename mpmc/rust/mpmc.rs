@@ -297,11 +297,21 @@ fn main() {
     let mut nSend = 1;
     let mut nRecv = 1;
     let args : Vec<String> = std::env::args().collect();
-    //println!("{:?}", args);
+    // println!("{:?}", args);
     if args.len() > 1 {
-        nSend = i32::from_str(&args[1]).unwrap();
+        if let Ok(x) = i32::from_str(&args[1]) {
+            nSend = x;
+        } else {
+            println!("invalid args: {}", &args[1]);
+            return;
+        }
         if args.len() > 2 {
-            nRecv = i32::from_str(&args[2]).unwrap();
+            if let Ok(x) = i32::from_str(&args[2]) {
+                nRecv = x;
+            } else {
+                println!("invalid args: {}", &args[2]);
+                return;
+            }
         }
     }
     let capacity = (2 << 16);
@@ -315,7 +325,7 @@ fn main() {
         let sq = q.clone();
         let rs = &rsRecv[0].Val as *const i64 as usize;
         thread::spawn(move ||{
-            let mut rs = unsafe{(rs as *const i64 as *mut i64).as_mut().unwrap()};
+            let rs = unsafe{(rs as *const i64 as *mut i64).as_mut().unwrap()};
             recvQ(&*sq, rs);
         });
     }
@@ -324,7 +334,7 @@ fn main() {
         let sq = q.clone();
         let rs = &rsSend[0].Val as *const i64 as usize;
         thread::spawn(move ||{
-            let mut rs = unsafe{(rs as *const i64 as *mut i64).as_mut().unwrap()};
+            let rs = unsafe{(rs as *const i64 as *mut i64).as_mut().unwrap()};
             sendQ(&*sq, rs);
         });
     }

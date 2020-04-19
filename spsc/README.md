@@ -31,7 +31,7 @@ thread1(goroutine1) ---send----> spsc_queue ---recv---> thread2(goroutine2)
 test case              | busy loop                 | wait condition
 -----------------------|---------------------------|----------------
 go                     | 7612 recv/ms, 131 ns/recv | 8028 recv/ms, 124 ns/recv
-rust1_1                | 4307 recv/ms, 232 ns/recv | 4246 recv/ms, 236 ns/recv
-rust1_2                | 4326 recv/ms, 231 ns/recv | 4238 recv/ms, 236 ns/recv
-rust2_1                | 3882 recv/ms, 258 ns/recv | 3810 recv/ms, 262 ns/recv
+rust1_1                | 7190 recv/ms, 139 ns/recv | 9054 recv/ms, 110 ns/recv
+rust1_2                | 11767 recv/ms, 85 ns/recv | 10985 recv/ms, 91 ns/recv
+rust2_1                | 8167 recv/ms, 122 ns/recv | 8085 recv/ms, 124 ns/recv
 
